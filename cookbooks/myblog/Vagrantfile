@@ -1,0 +1,48 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  
+  # Enable Berkshelf. To find out more about this, visit http://berkshelf.com
+  config.berkshelf.enabled = true
+
+  config.vm.box = "Berkshelf-CentOS-6.3-x86_64-minimal"
+  config.vm.box_url = "https://dl.dropbox.com/u/31081437/Berkshelf-CentOS-6.3-x86_64-minimal.box"
+  config.vm.network :private_network, ip: "33.33.33.10"
+  config.ssh.max_tries = 40
+  config.ssh.timeout   = 120
+
+  config.vm.define :wordpress do |wp|
+    wp.vm.hostname = "myblog-local"
+    wp.berkshelf.enabled = true  
+    wp.vm.provision :chef_solo do |chef|
+      chef.json = {
+        :mysql => {
+          :server_root_password => 'password',
+          :server_debian_password => 'password',
+          :server_repl_password => 'password'
+        }
+      }
+
+      chef.run_list = [
+          "recipe[myblog::default]"
+      ]
+    end
+  end
+
+  config.vm.define :wordpress_aws do |wp|
+    wp.vm.hostname = "myblog-wordpress"
+    wp.vm.box = "wordpress"
+  end
+
+  config.vm.define :frontend_aws do |frontend|
+    frontend.vm.hostname = "myblog-frontend"
+    frontend.vm.box = "frontend"
+  end
+
+  config.vm.define :backend_aws do |backend|
+    backend.vm.hostname = "myblog-backend"
+    backend.vm.box = "backend"
+  end
+
+end

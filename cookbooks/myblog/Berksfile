@@ -1,0 +1,17 @@
+site :opscode
+
+group :wordpress do
+  cookbook 'wordpress'
+  cookbook 'partial_search'
+end
+
+group :sensu do
+  cookbook 'sensu', git: 'https://github.com/sensu/sensu-chef.git'
+  cookbook 'redis', git: 'https://github.com/miah/chef-redis.git'
+end
+
+group :integration do
+  cookbook "minitest-handler"
+end
+
+metadata

@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "backend"
+
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  config.vm.provider :aws do |aws, override|
+    aws.access_key_id = ""
+    aws.secret_access_key = ""
+    aws.keypair_name = ""
+    aws.instance_type = "t1.micro"
+    aws.security_groups = ["wp-ops","wp-mysql"]
+    aws.tags = {"Name" => "wp-backend"}
+
+    aws.ami = ""
+
+    override.ssh.username = "ubuntu"
+    override.ssh.private_key_path = File.expand_path('../your-private-key.pem', __FILE__)
+  end
+
+  config.vm.provision :chef_client do |chef|
+    chef.chef_server_url = ""
+    chef.validation_client_name = ""
+    chef.node_name = "backend"
+    chef.validation_key_path = File.expand_path('../your-validation-key.pem', __FILE__)
+
+    chef.json = {
+      :mysql => {
+        :server_root_password => 'password',
+        :server_debian_password => 'password',
+        :server_repl_password => 'password'
+      }
+    }
+
+    chef.run_list = [
+        "recipe[myblog::backend]"
+    ]
+  end
+end
